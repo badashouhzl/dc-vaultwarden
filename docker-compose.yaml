@@ -1,0 +1,31 @@
+
+services:
+  vaultwarden:
+    image: ${image}
+    container_name: 'vaultwarden'
+    restart: ${restart}
+    ports:
+      - ${port}:80
+    volumes: 
+      - /etc/localtime:/etc/localtime
+      - vol-vaultwarden:/data:rw
+    # command: ["sleep", "10m"]         # 调试问题打开用
+    environment:
+      DOMAIN: 
+      SIGNUPS_ALLOWED: 
+      DATABASE_URL: 
+    networks:
+      net-custom:
+        ipv4_address: 172.19.254.194     # 指定 ip
+        aliases: 
+          - net-vaultwarden
+
+
+networks: 
+  net-custom:
+    name: ${network}
+    external: true 
+
+volumes:
+  vol-vaultwarden:
+    external: true
