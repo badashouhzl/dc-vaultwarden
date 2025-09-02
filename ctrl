@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# 工作路径
+g_workPath=$(cd `dirname \$0`; pwd -P)
+cd $g_workPath
+
+. $g_workPath/script/func.sh
+. $g_workPath/.env
+
+help() {
+	cat << EOF
+用法: ./ctrl [选项]
+可用选项:
+    init            初始化容器部署文件(端口转发), 没有执行 private 之前
+    init private    初始化容器部署文件(nginx 代理)
+    init public     还原容器部署文件为(端口转发)
+    save            备份容器的数据卷(备份在 backup/<数据卷名称>.tar.gz)
+    save <备份名称>  备份容器的数据卷(备份在 backup/<备份名称>.tar.gz)
+    load            还原备份容器的数据卷(备份在 backup/<数据卷名称>.tar.gz)
+    load <备份名称>  还原备份容器的数据卷(备份在 backup/<备份名称>.tar.gz)
+EOF
+}
+
+init() {
+	# 创建卷
+	echo "----- create volume ------"
+	mkVolume "vol-vaultwarden"
+	if [ "$1" == "private" ]
+	then 
+		setEnv "network" "net-private" $g_workPath/.env \
+		&& sed -i "s/172.18.254.194/172.19.254.194/" docker-compose.yaml \
+		&& sed -i "s/172.18.254.194/172.19.254.194/" vaultwarden.nginx.conf \
+		&& succEcho "convert private success"
+	elif [ "$1" == "public" ]
+	then
+		setEnv "network" "net-public" $g_workPath/.env \
+		&& sed -i "s/172.19.254.194/172.18.254.194/" docker-compose.yaml \
+		&& sed -i "s/172.19.254.194/172.18.254.194/" vaultwarden.nginx.conf \
+		&& succEcho "convert public success"
+	fi
+}
+
+sql() {
+	local sql="psql -U vaultwarden"
+
+	docker compose exec -it vaultwarden /bin/sh -c "$sql"
+}
+
+case $1 in
+	init)
+		. ./script/init.sh
+		init "$2"
+		;;
+	save)
+		. ./script/save.sh vol-vaultwarden "$2"
+		;;
+	load)
+		. ./script/load.sh vol-vaultwarden "$2"
+		;;
+	*)
+		help
+		;;
+esac	

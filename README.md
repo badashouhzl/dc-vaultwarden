@@ -51,12 +51,25 @@
 	- DATABASE_URL: 数据存放点
 	- 其它及详情参数文件中有注释
 - docker-compose.yaml: docker 容器编排文件无需修改
-- init.sh: 初始化运行环境文件，此文件不用修改
+- ctrl: 本容器的一些命令封装
 
 ### 部署容器
 时空目录后运行下面命令
 ```bash
-sh init.sh
+chmod +x ctrl
+ctrl init # 或 ctrl init private #(容器无网络，需要代理)
 docker compose up -d
 ```
 
+
+### 容器编排 文件说明
+```
+dc-vaultwarden
+├─ .env                    docker-compose.yaml 的配置文件
+├─ ctrl                    本容器的一些命令封装
+├─ docker-compose.yaml     容器编排文件
+├─ README.en.md
+├─ README.md
+├─ script                  一些脚本提供给 ctrl 调用
+├─ sql.sql                 容器需要的 pgsql 脚本
+└─ vaultwarden.nginx.conf  nginx 代理配置文件，要使用 nginx 代理的, 需要的使用

@@ -14,9 +14,10 @@ services:
       DOMAIN: 
       SIGNUPS_ALLOWED: 
       DATABASE_URL: 
+      ADMIN_TOKEN: 
     networks:
       net-custom:
-        ipv4_address: 172.19.254.194     # 指定 ip
+        ipv4_address: 172.19.254.194    # 指定 ip
         aliases: 
           - net-vaultwarden
 
